@@ -23,7 +23,7 @@ class Car:
                 self.w = w
                 self.h = h
                 self.rect = pygame.Rect(x, y, h, w)
-                self.surface = pygame.Surface((h, w))
+                self.surface = pygame.Surface((h, w), pygame.SRCALPHA)
                 self.surface.blit(car_img, (0, 0))
                 self.angle = -90
                 self.speed = 0               
