@@ -84,13 +84,10 @@ class Car:
 
 
 class FinishLine:
-    def __init__(self, w, h):
+    def __init__(self):
         self.image = pygame.image.load("./assets/finish.png")
-        self.w = w
-        self.h = h 
-        self.surface = pygame.Surface((w, h), pygame.SRCALPHA)
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect(topleft=(800, 800))
+        self.rect = self.image.get_rect(topleft=(810, 890))
         
     def update(self):
         screen.blit(self.image, self.rect)
@@ -113,7 +110,7 @@ class Track:
         self.rect = self.image.get_rect(topleft=(center_x, center_y))
         screen.blit(self.image, self.rect)
 
-finish = FinishLine(200, 50)
+finish = FinishLine()
 track = Track(0, 0, 1920, 1080)
 car = Car(800, 900, 36, 19)   
 clock = pygame.time.Clock()
