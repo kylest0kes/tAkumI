@@ -1,16 +1,31 @@
 from random import randint
 import pygame, math
-import neat
-import os
-
+# import neat
+# import os
 # import sys
 
 pygame.init()
 
-win_size = (1920, 1080)  # Width, Height
-screen = pygame.display.set_mode(win_size)
+# win_size = (1920, 1080)  # Width, Height
+screen = pygame.display.set_mode((1920, 1080))
 
-# trackArr = [pygame.transform.scale(pygame.image.load(os.path.join("assets/tracks", "map.png")), win_size), pygame.transform.scale(pygame.image.load(os.path.join("assets/tracks", "map2.png")), win_size), pygame.transform.scale(pygame.image.load(os.path.join("assets/tracks", "map3.png")), win_size), pygame.transform.scale(pygame.image.load(os.path.join("assets/tracks", "map4.png")), win_size), pygame.transform.scale(pygame.image.load(os.path.join("assets/tracks", "map5.png")), win_size)]
+# trackArr = [
+#     pygame.transform.scale(
+#         pygame.image.load(os.path.join("assets/tracks", "map.png")), win_size
+#     ),
+#     pygame.transform.scale(
+#         pygame.image.load(os.path.join("assets/tracks", "map2.png")), win_size
+#     ),
+#     pygame.transform.scale(
+#         pygame.image.load(os.path.join("assets/tracks", "map3.png")), win_size
+#     ),
+#     pygame.transform.scale(
+#         pygame.image.load(os.path.join("assets/tracks", "map4.png")), win_size
+#     ),
+#     pygame.transform.scale(
+#         pygame.image.load(os.path.join("assets/tracks", "map5.png")), win_size
+#     ),
+# ]
 # track = trackArr[randint(0, len(trackArr)-1)]
 
 trackArr = [
@@ -20,8 +35,8 @@ trackArr = [
     "./assets/tracks/map4.png",
     "./assets/tracks/map5.png",
 ]
-track = pygame.image.load(trackArr[randint(0, len(trackArr) - 1)])
-track = pygame.transform.scale(track, (1920, 1080))
+# track = pygame.image.load(trackArr[randint(0, len(trackArr) - 1)])
+# track = pygame.transform.scale(track, (1920, 1080))
 
 # print(track)
 
@@ -49,13 +64,36 @@ class Car:
         surface_rect = self.surface.get_rect(topleft=self.rect.topleft)
         new_rect = rotated.get_rect(center=surface_rect.center)
         screen.blit(rotated, new_rect.topleft)
+        
+    def move(self):
+        key_press = pygame.key.get_pressed()
+        self.speed *= 0.9
+        
+        if key_press[pygame.K_UP]:
+            self.speed += 0.8
+        if key_press[pygame.K_DOWN]:
+            self.speed -= 0.4
+
+        if key_press[pygame.K_LEFT]:
+            car.angle += self.speed / 0.75
+        if key_press[pygame.K_RIGHT]:
+            car.angle -= self.speed / 0.75
+        
+        car.x -= self.speed * math.sin(math.radians(car.angle))
+        car.y -= self.speed * math.cos(math.radians(-car.angle))
 
 
-# class FinishLine:
-#     def __init__(self, finish_img):
-#         self.finish_img = finish_img
-#         self.mask = pygame.mask.from_surface(self.image)
-#         self.rect = self.image.get_rect(topleft=(780, 800))
+class FinishLine:
+    def __init__(self, w, h):
+        self.image = pygame.image.load("./assets/finish.png")
+        self.w = w
+        self.h = h 
+        self.surface = pygame.Surface((w, h), pygame.SRCALPHA)
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect = self.image.get_rect(topleft=(800, 800))
+        
+    def update(self):
+        screen.blit(self.image, self.rect)
 
 
 class Track:
@@ -67,7 +105,6 @@ class Track:
         self.image = pygame.image.load(trackArr[randint(0, len(trackArr) - 1)])
         self.rect = self.image.get_rect()
         self.surface = pygame.Surface((h, w))
-        # self.surface.blit(self.image, (0, 0))
         self.mask = pygame.mask.from_surface(self.image.convert_alpha())
 
     def update(self):
@@ -76,9 +113,9 @@ class Track:
         self.rect = self.image.get_rect(topleft=(center_x, center_y))
         screen.blit(self.image, self.rect)
 
-
+finish = FinishLine(200, 50)
 track = Track(0, 0, 1920, 1080)
-car1 = Car(800, 900, 36, 19)
+car = Car(800, 900, 36, 19)   
 clock = pygame.time.Clock()
 
 running = True
@@ -87,24 +124,11 @@ while running:
         if e.type == pygame.QUIT:
             running = False
 
-    screen.fill((255, 255, 255))
-    key_press = pygame.key.get_pressed()
-    car1.speed *= 0.9
-
-    if key_press[pygame.K_UP]:
-        car1.speed += 0.8
-    if key_press[pygame.K_DOWN]:
-        car1.speed -= 0.4
-
-    if key_press[pygame.K_LEFT]:
-        car1.angle += car1.speed / 0.75
-    if key_press[pygame.K_RIGHT]:
-        car1.angle -= car1.speed / 0.75
-    car1.x -= car1.speed * math.sin(math.radians(car1.angle))
-    car1.y -= car1.speed * math.cos(math.radians(-car1.angle))
-
+    screen.fill((255, 255, 255)) 
     track.update()
-    car1.draw()
+    finish.update()
+    car.draw()
+    car.move()
     pygame.display.flip()
     clock.tick(60)
 
