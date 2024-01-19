@@ -50,7 +50,7 @@ class Car:
         self.y = y
         self.w = w
         self.h = h
-        self.image = pygame.image.load("./assets/cars/ae86.png")
+        self.image = pygame.image.load("./assets/cars/ae86.png").convert()
         self.rect = pygame.Rect(x, y, h, w)
         self.surface = pygame.Surface((h, w), pygame.SRCALPHA)
         self.surface.blit(self.image, (0, 0))
@@ -85,7 +85,7 @@ class Car:
 
 class FinishLine:
     def __init__(self):
-        self.image = pygame.image.load("./assets/finish.png")
+        self.image = pygame.image.load("./assets/finish.png").convert()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect = self.image.get_rect(topleft=(810, 890))
         
@@ -99,7 +99,7 @@ class Track:
         self.y = y
         self.w = w
         self.h = h
-        self.image = pygame.image.load(trackArr[randint(0, len(trackArr) - 1)])
+        self.image = pygame.image.load(trackArr[randint(0, len(trackArr) - 1)]).convert()
         self.rect = self.image.get_rect()
         self.surface = pygame.Surface((h, w))
         self.mask = pygame.mask.from_surface(self.image.convert_alpha())
