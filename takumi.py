@@ -10,11 +10,11 @@ W, H = 1920, 1080
 screen = pygame.display.set_mode((W, H))
 
 trackArr = [
-    "./assets/tracks/track1.png"
-    "./assets/tracks/track2.png"
-    "./assets/tracks/track3.png"
-    "./assets/tracks/track4.png"
-    "./assets/tracks/track5.png"
+    "./assets/tracks/track1.png",
+    "./assets/tracks/track2.png",
+    "./assets/tracks/track3.png",
+    "./assets/tracks/track4.png",
+    "./assets/tracks/track5.png",
     "./assets/tracks/track6.png"
 ]
 
@@ -48,7 +48,7 @@ class Car:
         self.speed *= 0.9
         
         if key_press[pygame.K_UP]:
-            self.speed += 0.8
+            self.speed += 0.55
         if key_press[pygame.K_DOWN]:
             self.speed -= 0.4
 
@@ -65,7 +65,7 @@ class FinishLine:
     def __init__(self):
         self.image = pygame.image.load("./assets/finish.png").convert()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect(topleft=(810, 890))
+        self.rect = self.image.get_rect(topleft=(800, 833))
         
     def update(self):
         screen.blit(self.image, self.rect)
@@ -93,15 +93,6 @@ track = Track(0, 0, W, H)
 car = Car(800, 900, 36, 19)   
 clock = pygame.time.Clock()
 
-# test code to display background mask
-mask_overlay_surface = pygame.Surface((W, H), pygame.SRCALPHA)
-mask_overlay_surface.fill((0, 255, 0, 255))  # Transparent background for overlay
-
-# Set the alpha value for the masked area
-mask_overlay_surface.fill((0, 255, 0, 128), special_flags=pygame.BLEND_RGBA_MULT)
-
-
-
 running = True
 while running:
     for e in pygame.event.get():
@@ -115,8 +106,6 @@ while running:
     finish.update()
     car.draw()
     car.move()
-    # Blit the mask overlay onto the screen
-    screen.blit(mask_overlay_surface, (0, 0))
     pygame.display.flip()
     clock.tick(60)
 
