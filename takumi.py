@@ -28,6 +28,12 @@ class Car:
         self.y = y
         self.w = w
         self.h = h
+        self.center = [800 + self.w / 2, 900 + self.y / 2]
+        self.radars = [] 
+        self.drawing_radars = [] 
+        self.alive = True 
+        self.distance = 0 
+        self.time = 0 
         self.image = pygame.image.load("./assets/cars/ae86.png").convert()
         self.rect = pygame.Rect(x, y, h, w)
         self.surface = pygame.Surface((h, w), pygame.SRCALPHA)
@@ -91,6 +97,7 @@ class Track:
 finish = FinishLine()
 track = Track(0, 0, W, H)
 car = Car(800, 900, 36, 19)   
+target_color = (255, 255, 255)
 clock = pygame.time.Clock()
 
 running = True
@@ -101,6 +108,16 @@ while running:
             pygame.quit()
             sys.exit()
 
+    
+    collision_point = (int(car.rect.x), int(car.rect.y))
+    background_color_at_collision = track.image.get_at(collision_point)
+    
+    if background_color_at_collision == target_color:
+        print("Collision detected!")
+        running = False
+        pygame.quit()
+        sys.exit()
+    
     screen.fill((255, 255, 255)) 
     track.update()
     finish.update()
