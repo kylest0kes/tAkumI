@@ -1,44 +1,22 @@
 from random import randint
 import pygame, math
-# import neat
-# import os
-# import sys
+import sys
+import neat
 
 pygame.init()
 
-# win_size = (1920, 1080)  # Width, Height
-screen = pygame.display.set_mode((1920, 1080))
+W, H = 1920, 1080
 
-# trackArr = [
-#     pygame.transform.scale(
-#         pygame.image.load(os.path.join("assets/tracks", "map.png")), win_size
-#     ),
-#     pygame.transform.scale(
-#         pygame.image.load(os.path.join("assets/tracks", "map2.png")), win_size
-#     ),
-#     pygame.transform.scale(
-#         pygame.image.load(os.path.join("assets/tracks", "map3.png")), win_size
-#     ),
-#     pygame.transform.scale(
-#         pygame.image.load(os.path.join("assets/tracks", "map4.png")), win_size
-#     ),
-#     pygame.transform.scale(
-#         pygame.image.load(os.path.join("assets/tracks", "map5.png")), win_size
-#     ),
-# ]
-# track = trackArr[randint(0, len(trackArr)-1)]
+screen = pygame.display.set_mode((W, H))
 
 trackArr = [
-    "./assets/tracks/map.png",
-    "./assets/tracks/map2.png",
-    "./assets/tracks/map3.png",
-    "./assets/tracks/map4.png",
-    "./assets/tracks/map5.png",
+    "./assets/tracks/track1.png"
+    "./assets/tracks/track2.png"
+    "./assets/tracks/track3.png"
+    "./assets/tracks/track4.png"
+    "./assets/tracks/track5.png"
+    "./assets/tracks/track6.png"
 ]
-# track = pygame.image.load(trackArr[randint(0, len(trackArr) - 1)])
-# track = pygame.transform.scale(track, (1920, 1080))
-
-# print(track)
 
 pygame.display.set_caption("tAkumI")
 pygame.display.update()
@@ -99,7 +77,7 @@ class Track:
         self.y = y
         self.w = w
         self.h = h
-        self.image = pygame.image.load(trackArr[randint(0, len(trackArr) - 1)]).convert()
+        self.image = pygame.image.load(trackArr[randint(0, len(trackArr) - 1)]).convert_alpha()
         self.rect = self.image.get_rect()
         self.surface = pygame.Surface((h, w))
         self.mask = pygame.mask.from_surface(self.image.convert_alpha())
@@ -111,22 +89,35 @@ class Track:
         screen.blit(self.image, self.rect)
 
 finish = FinishLine()
-track = Track(0, 0, 1920, 1080)
+track = Track(0, 0, W, H)
 car = Car(800, 900, 36, 19)   
 clock = pygame.time.Clock()
+
+# test code to display background mask
+mask_overlay_surface = pygame.Surface((W, H), pygame.SRCALPHA)
+mask_overlay_surface.fill((0, 255, 0, 255))  # Transparent background for overlay
+
+# Set the alpha value for the masked area
+mask_overlay_surface.fill((0, 255, 0, 128), special_flags=pygame.BLEND_RGBA_MULT)
+
+
 
 running = True
 while running:
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             running = False
+            pygame.quit()
+            sys.exit()
 
     screen.fill((255, 255, 255)) 
     track.update()
     finish.update()
     car.draw()
     car.move()
+    # Blit the mask overlay onto the screen
+    screen.blit(mask_overlay_surface, (0, 0))
     pygame.display.flip()
     clock.tick(60)
 
-pygame.quit()
+
