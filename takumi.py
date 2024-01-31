@@ -47,22 +47,14 @@ class Car:
         new_rect = rotated.get_rect(center=surface_rect.center)
         screen.blit(rotated, new_rect.topleft)
 
-    def update_corners(self):
-        self.corners = [
-            (self.x, self.y),
-            (self.x + self.w, self.y),
-            (self.x, self.y + self.h),
-            (self.x + self.w, self.y + self.h),
-        ]
-
     def move(self):
         key_press = pygame.key.get_pressed()
         self.speed *= 0.9
 
         if key_press[pygame.K_UP]:
             self.speed += 0.55
-        if key_press[pygame.K_DOWN]:
-            self.speed -= 0.4
+        # if key_press[pygame.K_DOWN]:
+        #     self.speed -= 0.4
 
         if key_press[pygame.K_LEFT]:
             car.angle += self.speed / 0.75
@@ -71,6 +63,9 @@ class Car:
 
         car.x -= self.speed * math.sin(math.radians(car.angle))
         car.y -= self.speed * math.cos(math.radians(-car.angle))
+        
+    def set_center_beacon(self):
+        pygame.draw.circle(screen, (57, 255, 20), self.rect.center, 5)
 
 
 class FinishLine:
@@ -103,13 +98,11 @@ class Track:
         screen.blit(self.image, self.rect)
 
 def check_collision_with_background(surface, rect, bg_color):
-    # Get the four edges of the rectangle
     left_edge = rect.left
     right_edge = rect.right
     top_edge = rect.top
     bottom_edge = rect.bottom
 
-    # Check collision for each edge
     left_collision = any(surface.get_at((left_edge, y))[:3] == bg_color for y in range(top_edge, bottom_edge))
     right_collision = any(surface.get_at((right_edge, y))[:3] == bg_color for y in range(top_edge, bottom_edge))
     top_collision = any(surface.get_at((x, top_edge))[:3] == bg_color for x in range(left_edge, right_edge))
@@ -117,10 +110,14 @@ def check_collision_with_background(surface, rect, bg_color):
 
     return left_collision or right_collision or top_collision or bottom_collision
 
+# may not need, but keeping here incase i do, since it works
+# def check_collision_with_finish(mask1, mask2, rect1, rect2):
+#     if mask1.overlap(mask2, (rect2.x - rect1.x, rect2.y - rect1.y)):
+#         print("Finish Line passed")
 
 finish = FinishLine()
 track = Track(0, 0, W, H)
-car = Car(800, 870, 36, 19)
+car = Car(875, 870, 36, 19)
 target_color = (255, 255, 255)
 clock = pygame.time.Clock()
 
@@ -131,17 +128,22 @@ while running:
             running = False
             pygame.quit()
             sys.exit()
-    
+
     if check_collision_with_background(track.image, car.rect, target_color):
         print("Collision detected!")
+        car.alive = False
         running = False
         pygame.quit()
         sys.exit()
-
+        
+    # check_collision_with_finish(car.mask, finish.mask, car.rect, finish.rect)
+    
     screen.fill((255, 255, 255))
     track.update()
     finish.update()
     car.draw()
     car.move()
+    car.set_center_beacon()
+    
     pygame.display.flip()
     clock.tick(60)
