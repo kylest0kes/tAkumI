@@ -6,6 +6,8 @@ import neat
 pygame.init()
 
 W, H = 1920, 1080
+RADAR_COLOR = (57, 255, 20)
+WHITE = (255, 255, 255)
 
 screen = pygame.display.set_mode((W, H))
 
@@ -32,9 +34,10 @@ class Car:
         self.alive = True
         self.distance = 0
         self.time = 0
-        self.rect = pygame.Rect(x, y, h, w)
+        self.radars = [0] * 5
+        self.rect = pygame.Rect(x, y, w, h)
         self.image = pygame.image.load("./assets/cars/ae86.png").convert_alpha()
-        self.surface = pygame.Surface((h, w), pygame.SRCALPHA)
+        self.surface = pygame.Surface((w, h), pygame.SRCALPHA)
         self.surface.blit(self.image, (0, 0))
         self.angle = -90
         self.speed = 0
@@ -53,20 +56,44 @@ class Car:
 
         if key_press[pygame.K_UP]:
             self.speed += 0.55
-        # if key_press[pygame.K_DOWN]:
-        #     self.speed -= 0.4
-
         if key_press[pygame.K_LEFT]:
-            car.angle += self.speed / 0.75
+            self.angle += self.speed / 0.75
         if key_press[pygame.K_RIGHT]:
-            car.angle -= self.speed / 0.75
+            self.angle -= self.speed / 0.75
 
-        car.x -= self.speed * math.sin(math.radians(car.angle))
-        car.y -= self.speed * math.cos(math.radians(-car.angle))
+        self.x -= self.speed * math.sin(math.radians(self.angle))
+        self.y -= self.speed * math.cos(math.radians(-self.angle))
+
+        self.center = [self.x + self.w / 2, self.y + self.h / 2]
         
     def set_center_beacon(self):
-        pygame.draw.circle(screen, (57, 255, 20), self.rect.center, 5)
+        pygame.draw.circle(screen, RADAR_COLOR, self.rect.center, 5)
+    
+    def check_radar(self, deg, track):
+        length = 0
+        max_len = 95
 
+        while length <= max_len:
+            x = int(self.rect.center[0] + math.cos(math.radians(360 - (self.angle + deg))) * length)
+            y = int(self.rect.center[1] + math.sin(math.radians(360 - (self.angle + deg))) * length)
+
+            if 0 <= x < track.surface.get_width() and 0 <= y < track.surface.get_height():
+                pixel_color = track.surface.get_at((x, y))[:3] 
+                if pixel_color == WHITE:
+                    break
+
+            length += 1
+
+        dist = int(math.sqrt(math.pow(x - self.rect.center[0], 2) + math.pow(y - self.rect.center[1], 2)))
+        self.radars.append(((x, y), dist))
+    
+    def draw_radars(self, screen, track):
+        self.radars = []
+        for deg in range(0, 181, 45):
+            self.check_radar(deg, track)
+            pygame.draw.line(screen, RADAR_COLOR, self.rect.center, self.radars[-1][0], 2)
+        
+                    
 
 class FinishLine:
     def __init__(self):
@@ -86,16 +113,17 @@ class Track:
         self.h = h
         self.image = pygame.image.load(
             trackArr[randint(0, len(trackArr) - 1)]
-        ).convert_alpha()
+        ).convert()
         self.rect = self.image.get_rect()
-        self.surface = pygame.Surface((h, w))
-        self.mask = pygame.mask.from_surface(self.image.convert_alpha())
-
+        self.surface = pygame.Surface((w, h))
+        self.mask = pygame.mask.from_surface(self.image.convert())
+    
     def update(self):
         center_x = round(self.x)
         center_y = round(self.y)
         self.rect = self.image.get_rect(topleft=(center_x, center_y))
-        screen.blit(self.image, self.rect)
+        self.surface.blit(self.image, (0, 0))
+        screen.blit(self.surface, self.rect) 
 
 def check_collision_with_background(surface, rect, bg_color):
     left_edge = rect.left
@@ -110,15 +138,14 @@ def check_collision_with_background(surface, rect, bg_color):
 
     return left_collision or right_collision or top_collision or bottom_collision
 
-# may not need, but keeping here incase i do, since it works
+# may not need to track collisions with the finish line, but keeping here incase i do, since it works
 # def check_collision_with_finish(mask1, mask2, rect1, rect2):
 #     if mask1.overlap(mask2, (rect2.x - rect1.x, rect2.y - rect1.y)):
 #         print("Finish Line passed")
 
 finish = FinishLine()
 track = Track(0, 0, W, H)
-car = Car(875, 870, 36, 19)
-target_color = (255, 255, 255)
+car = Car(875, 870, 19, 36)
 clock = pygame.time.Clock()
 
 running = True
@@ -129,7 +156,7 @@ while running:
             pygame.quit()
             sys.exit()
 
-    if check_collision_with_background(track.image, car.rect, target_color):
+    if check_collision_with_background(track.image, car.rect, WHITE):
         print("Collision detected!")
         car.alive = False
         running = False
@@ -138,12 +165,13 @@ while running:
         
     # check_collision_with_finish(car.mask, finish.mask, car.rect, finish.rect)
     
-    screen.fill((255, 255, 255))
+    screen.fill((0, 0, 0))
     track.update()
     finish.update()
     car.draw()
-    car.move()
+    car.draw_radars(screen, track)
     car.set_center_beacon()
+    car.move()
     
     pygame.display.flip()
     clock.tick(60)
