@@ -40,7 +40,7 @@ class Car:
         self.surface = pygame.Surface((w, h), pygame.SRCALPHA)
         self.surface.blit(self.image, (0, 0))
         self.angle = -90
-        self.speed = 0
+        self.speed = 0.9
         self.mask = pygame.mask.from_surface(self.image)
 
     def draw(self):
@@ -51,15 +51,7 @@ class Car:
         screen.blit(rotated, new_rect.topleft)
 
     def move(self):
-        key_press = pygame.key.get_pressed()
         self.speed *= 0.9
-
-        if key_press[pygame.K_UP]:
-            self.speed += 0.55
-        if key_press[pygame.K_LEFT]:
-            self.angle += self.speed / 0.75
-        if key_press[pygame.K_RIGHT]:
-            self.angle -= self.speed / 0.75
 
         self.x -= self.speed * math.sin(math.radians(self.angle))
         self.y -= self.speed * math.cos(math.radians(-self.angle))
@@ -115,8 +107,16 @@ class Car:
         return self.alive
 
     def eval_reward(self):
-        # may need to try 39 instead of 16 #
-        return self.distance / (16 / 2)
+        # Higher reward for traveling farther
+        distance_reward = self.distance / (16 / 2)
+
+        # Penalize cars that do not move (speed is close to zero)
+        movement_penalty = 0.01 if abs(self.speed) < 0.01 else 0
+
+        # Final reward is a combination of distance reward and movement penalty
+        final_reward = distance_reward - movement_penalty
+
+        return final_reward
 
     def get_radar_data(self):
         radars = self.radars
@@ -144,8 +144,11 @@ class Track:
         self.w = w
         self.h = h
         self.image = pygame.image.load(
-            trackArr[randint(0, len(trackArr) - 1)]
+            trackArr[0]
         ).convert()
+        # self.image = pygame.image.load(
+        #     trackArr[randint(0, len(trackArr) - 1)]
+        # ).convert()
         self.rect = self.image.get_rect()
         self.surface = pygame.Surface((w, h))
         self.mask = pygame.mask.from_surface(self.image.convert())
@@ -231,10 +234,10 @@ def run_sim(genomes, config):
             elif action == 1:
                 car.angle -= car.speed / 0.75
             elif action == 2:
-                if car.speed >= 3:
-                    car.speed -= 0.55
+                if car.speed >= 6:
+                    car.speed -= 1
             else:
-                car.speed += 0.55
+                car.speed += 1
 
         alive = 0
         for i, car in enumerate(cars):
@@ -245,7 +248,8 @@ def run_sim(genomes, config):
 
         if alive == 0:
             break
-
+        
+        time += 1
         if time == 30 * 40:
             break
 
