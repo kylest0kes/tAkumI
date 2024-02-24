@@ -8,6 +8,7 @@ pygame.init()
 W, H = 1920, 1080
 RADAR_COLOR = (57, 255, 20)
 WHITE = (255, 255, 255)
+GEN = 0
 
 screen = pygame.display.set_mode((W, H))
 
@@ -175,3 +176,37 @@ while running:
     
     pygame.display.flip()
     clock.tick(60)
+
+# def main(genomes, config):
+#     finish = FinishLine()
+#     track = Track(0, 0, W, H)
+#     car = Car(875, 870, 19, 36)
+#     clock = pygame.time.Clock()
+
+#     running = True
+#     while running:
+#         for e in pygame.event.get():
+#             if e.type == pygame.QUIT:
+#                 running = False
+#                 pygame.quit()
+#                 sys.exit()
+
+#         if check_collision_with_background(track.image, car.rect, WHITE):
+#             print("Collision detected!")
+#             car.alive = False
+#             running = False
+#             pygame.quit()
+#             sys.exit()
+            
+#         # check_collision_with_finish(car.mask, finish.mask, car.rect, finish.rect)
+        
+#         screen.fill((0, 0, 0))
+#         track.update()
+#         finish.update()
+#         car.draw()
+#         car.draw_radars(screen, track)
+#         car.set_center_beacon()
+#         car.move()
+        
+#         pygame.display.flip()
+#         clock.tick(60)
