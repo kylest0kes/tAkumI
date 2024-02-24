@@ -51,17 +51,14 @@ class Car:
         screen.blit(rotated, new_rect.topleft)
 
     def move(self):
-        self.speed *= 0.9
+        speed = 5.0
 
-        self.x -= self.speed * math.sin(math.radians(self.angle))
-        self.y -= self.speed * math.cos(math.radians(-self.angle))
+        self.x -= speed * math.sin(math.radians(self.angle))
+        self.y -= speed * math.cos(math.radians(self.angle))
 
         self.center = [self.x + self.w / 2, self.y + self.h / 2]
 
         self.time += 1
-
-    def set_center_beacon(self):
-        pygame.draw.circle(screen, RADAR_COLOR, self.rect.center, 5)
 
     def check_radar(self, deg, track):
         length = 0
@@ -70,11 +67,11 @@ class Car:
         while length <= max_len:
             x = int(
                 self.rect.center[0]
-                + math.cos(math.radians(360 - (self.angle + deg))) * length
+                + math.cos(math.radians(self.angle + deg)) * length  # Adjust angle calculation
             )
             y = int(
                 self.rect.center[1]
-                + math.sin(math.radians(360 - (self.angle + deg))) * length
+                - math.sin(math.radians(self.angle + deg)) * length  # Adjust angle calculation
             )
 
             if (
@@ -96,6 +93,7 @@ class Car:
         self.radars.append(((x, y), dist))
 
     def draw_radars(self, screen, track):
+        pygame.draw.circle(screen, RADAR_COLOR, self.rect.center, 5)
         self.radars = []
         for deg in range(0, 181, 45):
             self.check_radar(deg, track)
@@ -107,16 +105,10 @@ class Car:
         return self.alive
 
     def eval_reward(self):
-        # Higher reward for traveling farther
-        distance_reward = self.distance / (16 / 2)
-
-        # Penalize cars that do not move (speed is close to zero)
-        movement_penalty = 0.01 if abs(self.speed) < 0.01 else 0
-
-        # Final reward is a combination of distance reward and movement penalty
-        final_reward = distance_reward - movement_penalty
-
-        return final_reward
+        if self.distance < 0:
+            return 0  
+        else:
+            return self.distance / (19 / 2)
 
     def get_radar_data(self):
         radars = self.radars
@@ -144,7 +136,7 @@ class Track:
         self.w = w
         self.h = h
         self.image = pygame.image.load(
-            trackArr[0]
+            trackArr[1]
         ).convert()
         # self.image = pygame.image.load(
         #     trackArr[randint(0, len(trackArr) - 1)]
@@ -230,9 +222,9 @@ def run_sim(genomes, config):
             data = nn[i].activate(car.get_radar_data())
             action = data.index(max(data))
             if action == 0:
-                car.angle += car.speed / 0.75
+                car.angle += 10
             elif action == 1:
-                car.angle -= car.speed / 0.75
+                car.angle -= 10
             elif action == 2:
                 if car.speed >= 6:
                     car.speed -= 1
@@ -245,6 +237,7 @@ def run_sim(genomes, config):
                 alive += 1
                 car.draw()
                 genomes[i][1].fitness += car.eval_reward()
+                g.fitness = car.eval_reward() / (time + 1)
 
         if alive == 0:
             break
@@ -261,7 +254,6 @@ def run_sim(genomes, config):
             if car.is_alive():
                 car.draw()
                 car.draw_radars(screen, track)
-                car.set_center_beacon()
 
         pygame.display.flip()
         clock.tick(60)
