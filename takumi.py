@@ -3,9 +3,13 @@ import pygame, math
 import sys
 import neat
 
-W, H = 1920, 1080
+# Window
+W, H = 1920, 1280
+
 RADAR_COLOR = (57, 255, 20)
-WHITE = (255, 255, 255)
+
+COLLISION_COLOR = (255, 255, 255)
+
 GEN = 0
 
 pygame.init()
@@ -36,7 +40,7 @@ class Car:
         self.time = 0
         self.radars = []
         self.rect = pygame.Rect(x, y, w, h)
-        self.image = pygame.image.load("./assets/cars/ae86.png").convert_alpha()
+        self.image = pygame.image.load("./assets/cars/ae86.png").convert()
         self.surface = pygame.Surface((w, h), pygame.SRCALPHA)
         self.surface.blit(self.image, (0, 0))
         self.angle = -90
@@ -79,7 +83,7 @@ class Car:
                 and 0 <= y < track.surface.get_height()
             ):
                 pixel_color = track.surface.get_at((x, y))[:3]
-                if pixel_color == WHITE:
+                if pixel_color == COLLISION_COLOR:
                     break
 
             length += 1
@@ -136,7 +140,7 @@ class Track:
         self.w = w
         self.h = h
         self.image = pygame.image.load(
-            trackArr[1]
+            trackArr[5]
         ).convert()
         # self.image = pygame.image.load(
         #     trackArr[randint(0, len(trackArr) - 1)]
@@ -152,6 +156,15 @@ class Track:
         self.surface.blit(self.image, (0, 0))
         screen.blit(self.surface, self.rect)
 
+class Button:
+    def __init__(self, x, y, radius, text, cb):
+        pass
+    
+    def draw(self, screen):
+        pass
+
+    def check_hover(self, mouse_pos):
+        pass
 
 def check_collision_with_background(surface, rect, bg_color):
     left_edge = rect.left
@@ -208,15 +221,6 @@ def run_sim(genomes, config):
                 pygame.quit()
                 sys.exit(0)
 
-        # add the collision detection for each car
-        for _, car in enumerate(cars):
-            if check_collision_with_background(track.image, car.rect, WHITE):
-                car.alive = False
-
-        # move cars
-        for _, car in enumerate(cars):
-            car.move()
-
         # get each cars actions
         for i, car in enumerate(cars):
             data = nn[i].activate(car.get_radar_data())
@@ -233,6 +237,9 @@ def run_sim(genomes, config):
 
         alive = 0
         for i, car in enumerate(cars):
+            car.move()
+            if check_collision_with_background(track.image, car.rect, COLLISION_COLOR):
+                car.alive = False
             if car.is_alive():
                 alive += 1
                 car.draw()
@@ -243,7 +250,7 @@ def run_sim(genomes, config):
             break
         
         time += 1
-        if time == 30 * 40:
+        if time == 2400:
             break
 
         screen.fill((0, 0, 0))
