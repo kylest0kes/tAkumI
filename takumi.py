@@ -3,15 +3,10 @@ import pygame, math
 import sys
 import neat
 
-# Window
 W, H = 1920, 1080
-
 RADAR_COLOR = (57, 255, 20)
-
 COLLISION_COLOR = (255, 255, 255)
-
 GEN = 0
-
 TRACK_INDEX = 0
 
 pygame.init()
@@ -229,6 +224,11 @@ def check_collision_with_background(surface, rect, bg_color):
 
     return left_collision or right_collision or top_collision or bottom_collision
 
+def cycle_to_next_track():
+    print('cycle to next track func hit')
+
+def cycle_to_prev_track():
+    print('cycle to prev track func hit')
 
 def run_sim(genomes, config):
 
@@ -245,8 +245,8 @@ def run_sim(genomes, config):
     cycle_tracks_text = Text("Cycle Between Tracks", 30, (130, 70), (0, 0, 0))
     
     buttons = [
-        Button(100, 80, 20, "<", lambda: print("Button 1 clicked!"), (150, 150, 150), (200, 200, 200)),
-        Button(375, 80, 20, ">", lambda: print("Button 2 clicked!"), (150, 150, 150), (200, 200, 200))
+        Button(100, 80, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
+        Button(375, 80, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200))
     ]
     
     finish = FinishLine()
