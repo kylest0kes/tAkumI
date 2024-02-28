@@ -4,7 +4,7 @@ import sys
 import neat
 
 # Window
-W, H = 1920, 1280
+W, H = 1920, 1080
 
 RADAR_COLOR = (57, 255, 20)
 
@@ -174,8 +174,8 @@ class Button:
         screen.blit(text, text_rect)
 
     def check_hover(self, mouse_pos):
-        dist = math.sqrt((self.x - mouse_pos[0])**2 + (self.y - mouse_pos[1]**2))
-        return dist < self.radius
+        distance = math.sqrt((self.x - mouse_pos[0])**2 + (self.y - mouse_pos[1])**2)
+        return distance < self.radius
 
 def check_collision_with_background(surface, rect, bg_color):
     left_edge = rect.left
@@ -215,6 +215,11 @@ def run_sim(genomes, config):
         g.fitness = 0
         cars.append(Car(875, 870, 19, 36))
 
+    buttons = [
+        Button(100, 80, 20, "<", lambda: print("Button 1 clicked!"), (150, 150, 150), (200, 200, 200)),
+        Button(200, 80, 20, ">", lambda: print("Button 2 clicked!"), (150, 150, 150), (200, 200, 200))
+    ]
+    
     finish = FinishLine()
     track = Track(0, 0, W, H)
     clock = pygame.time.Clock()
@@ -231,6 +236,11 @@ def run_sim(genomes, config):
             if e.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                for button in buttons:
+                    if button.check_hover((mouse_x, mouse_y)):
+                        button.cb()
 
         # get each cars actions
         for i, car in enumerate(cars):
@@ -273,6 +283,13 @@ def run_sim(genomes, config):
                 car.draw()
                 car.draw_radars(screen, track)
 
+        for button in buttons:
+            if button.check_hover(pygame.mouse.get_pos()):
+                button.color = button.hover_color
+            else:
+                button.color = (150, 150, 150)
+            button.draw(screen)
+        
         pygame.display.flip()
         clock.tick(60)
 
