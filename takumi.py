@@ -157,14 +157,25 @@ class Track:
         screen.blit(self.surface, self.rect)
 
 class Button:
-    def __init__(self, x, y, radius, text, cb):
-        pass
+    def __init__(self, x, y, radius, text, cb, color, hover_color):
+        self.x = x
+        self.y = y
+        self.radius = radius 
+        self.text = text
+        self.cb = cb 
+        self.color = color
+        self.hover_color = hover_color
     
     def draw(self, screen):
-        pass
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
+        font = pygame.font.Font(None, 32)
+        text = font.render(self.text, True, (0, 0, 0))
+        text_rect = text.get_rect(center=(self.x, self.y))
+        screen.blit(text, text_rect)
 
     def check_hover(self, mouse_pos):
-        pass
+        dist = math.sqrt((self.x - mouse_pos[0])**2 + (self.y - mouse_pos[1]**2))
+        return dist < self.radius
 
 def check_collision_with_background(surface, rect, bg_color):
     left_edge = rect.left
