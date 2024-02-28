@@ -12,6 +12,8 @@ COLLISION_COLOR = (255, 255, 255)
 
 GEN = 0
 
+TRACK_INDEX = 0
+
 pygame.init()
 screen = pygame.display.set_mode((W, H))
 
@@ -140,11 +142,8 @@ class Track:
         self.w = w
         self.h = h
         self.image = pygame.image.load(
-            trackArr[5]
+            trackArr[TRACK_INDEX]
         ).convert()
-        # self.image = pygame.image.load(
-        #     trackArr[randint(0, len(trackArr) - 1)]
-        # ).convert()
         self.rect = self.image.get_rect()
         self.surface = pygame.Surface((w, h))
         self.mask = pygame.mask.from_surface(self.image.convert())
@@ -176,6 +175,34 @@ class Button:
     def check_hover(self, mouse_pos):
         distance = math.sqrt((self.x - mouse_pos[0])**2 + (self.y - mouse_pos[1])**2)
         return distance < self.radius
+    
+class Text:
+    def __init__(self, text, font_size, position, color=(0, 0, 0), font=None):
+        self.text = text
+        self.font_size = font_size
+        self.position = position
+        self.color = color
+        self.font = font or pygame.font.Font(None, self.font_size)
+        self.update_surface()
+
+    def update_surface(self):
+        self.surface = self.font.render(self.text, True, self.color)
+        self.rect = self.surface.get_rect(topleft=self.position)
+
+    def set_text(self, text):
+        self.text = text
+        self.update_surface()
+
+    def set_position(self, position):
+        self.position = position
+        self.update_surface()
+
+    def set_color(self, color):
+        self.color = color
+        self.update_surface()
+
+    def draw(self, screen):
+        screen.blit(self.surface, self.rect.topleft)
 
 def check_collision_with_background(surface, rect, bg_color):
     left_edge = rect.left
@@ -215,9 +242,11 @@ def run_sim(genomes, config):
         g.fitness = 0
         cars.append(Car(875, 870, 19, 36))
 
+    cycle_tracks_text = Text("Cycle Between Tracks", 30, (130, 70), (0, 0, 0))
+    
     buttons = [
         Button(100, 80, 20, "<", lambda: print("Button 1 clicked!"), (150, 150, 150), (200, 200, 200)),
-        Button(200, 80, 20, ">", lambda: print("Button 2 clicked!"), (150, 150, 150), (200, 200, 200))
+        Button(375, 80, 20, ">", lambda: print("Button 2 clicked!"), (150, 150, 150), (200, 200, 200))
     ]
     
     finish = FinishLine()
@@ -289,6 +318,8 @@ def run_sim(genomes, config):
             else:
                 button.color = (150, 150, 150)
             button.draw(screen)
+        
+        cycle_tracks_text.draw(screen)
         
         pygame.display.flip()
         clock.tick(60)
