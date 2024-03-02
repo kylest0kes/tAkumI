@@ -200,11 +200,6 @@ class Text:
 
 ##########################################################################################  
 
-def restart():
-    global GEN, TRACK_INDEX
-    GEN += 1
-    TRACK_INDEX = 0
-
 def check_collision_with_background(surface, rect, bg_color):
     left_edge = rect.left
     right_edge = rect.right
@@ -234,124 +229,127 @@ def cycle_to_next_track():
     global TRACK_INDEX
     TRACK_INDEX = (TRACK_INDEX + 1) % len(trackArr)
     print('cycle to next track func hit', TRACK_INDEX)
-    restart()
+    start()
 
 def cycle_to_prev_track():
     global TRACK_INDEX
     TRACK_INDEX = (TRACK_INDEX - 1) % len(trackArr)
     print('cycle to prev track func hit', TRACK_INDEX)
-    restart()
-
-def run_sim(genomes, config):
-
-    nn = []
-    cars = []
-
-    # create a new nn for each genome that are passed in
-    for _, g in genomes:
-        n = neat.nn.FeedForwardNetwork.create(g, config)
-        nn.append(n)
-        g.fitness = 0
-        cars.append(Car(875, 870, 19, 36))
-
-    cycle_tracks_text = Text("Cycle Between Tracks", 30, (130, 70), (0, 0, 0))
+    start()
     
-    buttons = [
-        Button(100, 80, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
-        Button(375, 80, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200))
-    ]
-    
-    finish = FinishLine()
-    track = Track(0, 0, W, H)
-    clock = pygame.time.Clock()
+def start():
+    def run_sim(genomes, config):
 
-    # track generations
-    global GEN
-    GEN += 1
+        nn = []
+        cars = []
 
-    # keep track of time passed
-    time = 0
+        # create a new nn for each genome that are passed in
+        for _, g in genomes:
+            n = neat.nn.FeedForwardNetwork.create(g, config)
+            nn.append(n)
+            g.fitness = 0
+            cars.append(Car(875, 870, 19, 36))
 
-    while True:
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit(0)
-            elif e.type == pygame.MOUSEBUTTONDOWN:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                for button in buttons:
-                    if button.check_hover((mouse_x, mouse_y)):
-                        button.cb()
-
-        # get each cars actions
-        for i, car in enumerate(cars):
-            data = nn[i].activate(car.get_radar_data())
-            action = data.index(max(data))
-            if action == 0:
-                car.angle += 10
-            elif action == 1:
-                car.angle -= 10
-            elif action == 2:
-                if car.speed >= 6:
-                    car.speed -= 1
-            else:
-                car.speed += 1
-
-        alive = 0
-        for i, car in enumerate(cars):
-            car.move()
-            if check_collision_with_background(track.image, car.rect, COLLISION_COLOR):
-                car.alive = False
-            if car.is_alive():
-                alive += 1
-                car.draw()
-                genomes[i][1].fitness += car.eval_reward()
-                g.fitness = car.eval_reward() / (time + 1)
-
-        if alive == 0:
-            break
+        cycle_tracks_text = Text("Cycle Between Tracks", 30, (130, 70), (0, 0, 0))
         
-        time += 1
-        if time == 2400:
-            break
-
-        screen.fill((0, 0, 0))
-        track.update()
-        finish.update()
-
-        for car in cars:
-            if car.is_alive():
-                car.draw()
-                car.draw_radars(screen, track)
-
-        for button in buttons:
-            if button.check_hover(pygame.mouse.get_pos()):
-                button.color = button.hover_color
-            else:
-                button.color = (150, 150, 150)
-            button.draw(screen)
+        buttons = [
+            Button(100, 80, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
+            Button(375, 80, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200))
+        ]
         
-        cycle_tracks_text.draw(screen)
+        finish = FinishLine()
+        track = Track(0, 0, W, H)
+        clock = pygame.time.Clock()
+
+        # track generations
+        global GEN
+        GEN += 1
+
+        # keep track of time passed
+        time = 0
+
+        while True:
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit(0)
+                elif e.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_x, mouse_y = pygame.mouse.get_pos()
+                    for button in buttons:
+                        if button.check_hover((mouse_x, mouse_y)):
+                            button.cb()
+
+            # get each cars actions
+            for i, car in enumerate(cars):
+                data = nn[i].activate(car.get_radar_data())
+                action = data.index(max(data))
+                if action == 0:
+                    car.angle += 10
+                elif action == 1:
+                    car.angle -= 10
+                elif action == 2:
+                    if car.speed >= 6:
+                        car.speed -= 1
+                else:
+                    car.speed += 1
+
+            alive = 0
+            for i, car in enumerate(cars):
+                car.move()
+                if check_collision_with_background(track.image, car.rect, COLLISION_COLOR):
+                    car.alive = False
+                if car.is_alive():
+                    alive += 1
+                    car.draw()
+                    genomes[i][1].fitness += car.eval_reward()
+                    g.fitness = car.eval_reward() / (time + 1)
+
+            if alive == 0:
+                break
+            
+            time += 1
+            if time == 2400:
+                break
+
+            screen.fill((0, 0, 0))
+            track.update()
+            finish.update()
+
+            for car in cars:
+                if car.is_alive():
+                    car.draw()
+                    car.draw_radars(screen, track)
+
+            for button in buttons:
+                if button.check_hover(pygame.mouse.get_pos()):
+                    button.color = button.hover_color
+                else:
+                    button.color = (150, 150, 150)
+                button.draw(screen)
+            
+            cycle_tracks_text.draw(screen)
+            
+            pygame.display.flip()
+            clock.tick(60)
+
+    ##########################################################################################  
+
+    if __name__ == "__main__":
+
+        config_path = "./config.txt"
+        config = neat.config.Config(
+            neat.DefaultGenome,
+            neat.DefaultReproduction,
+            neat.DefaultSpeciesSet,
+            neat.DefaultStagnation,
+            config_path,
+        )
+
+        population = neat.Population(config)
+        population.add_reporter(neat.StdOutReporter(True))
+        stats = neat.StatisticsReporter()
+        population.add_reporter(stats)
         
-        pygame.display.flip()
-        clock.tick(60)
-
-##########################################################################################  
-
-if __name__ == "__main__":
-
-    config_path = "./config.txt"
-    config = neat.config.Config(
-        neat.DefaultGenome,
-        neat.DefaultReproduction,
-        neat.DefaultSpeciesSet,
-        neat.DefaultStagnation,
-        config_path,
-    )
-
-    population = neat.Population(config)
-    population.add_reporter(neat.StdOutReporter(True))
-    stats = neat.StatisticsReporter()
-    population.add_reporter(stats)
-    
-    population.run(run_sim, 1000)
+        population.run(run_sim, 1000)
+        
+start()
