@@ -6,6 +6,7 @@ import neat
 W, H = 1920, 1080
 RADAR_COLOR = (57, 255, 20)
 COLLISION_COLOR = (255, 255, 255)
+TEXT_COLOR = (0, 0, 0)
 GEN = 0
 TRACK_INDEX = 0
 
@@ -247,13 +248,6 @@ def start():
             nn.append(n)
             g.fitness = 0
             cars.append(Car(875, 870, 19, 36))
-
-        cycle_tracks_text = Text("Cycle Between Tracks", 30, (600, 1010), (0, 0, 0))
-        
-        buttons = [
-            Button(570, 1020, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
-            Button(845, 1020, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200))
-        ]
         
         finish = FinishLine()
         track = Track(0, 0, W, H)
@@ -308,6 +302,17 @@ def start():
             time += 1
             if time == 2400:
                 break
+            
+            cycle_tracks_text = Text("Cycle Between Tracks", 30, (600, 1010), TEXT_COLOR)
+            gen_text = Text("Generation: ", 30, (1000, 1010), TEXT_COLOR)
+            gen_text_value = Text(str(GEN), 30, (1125, 1010), TEXT_COLOR)
+            alive_text = Text("Alive Tally: ", 30, (1200, 1010), TEXT_COLOR)
+            alive_text_value = Text(str(alive), 30, (1315, 1010), TEXT_COLOR)
+        
+            buttons = [
+                Button(570, 1020, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
+                Button(845, 1020, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200))
+            ]
 
             screen.fill((0, 0, 0))
             track.update()
@@ -326,6 +331,10 @@ def start():
                 button.draw(screen)
             
             cycle_tracks_text.draw(screen)
+            gen_text.draw(screen)
+            gen_text_value.draw(screen)
+            alive_text.draw(screen)
+            alive_text_value.draw(screen)
             
             pygame.display.flip()
             clock.tick(60)
