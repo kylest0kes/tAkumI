@@ -200,6 +200,11 @@ class Text:
 
 ##########################################################################################  
 
+def restart():
+    global GEN, TRACK_INDEX
+    GEN += 1
+    TRACK_INDEX = 0
+
 def check_collision_with_background(surface, rect, bg_color):
     left_edge = rect.left
     right_edge = rect.right
@@ -229,11 +234,13 @@ def cycle_to_next_track():
     global TRACK_INDEX
     TRACK_INDEX = (TRACK_INDEX + 1) % len(trackArr)
     print('cycle to next track func hit', TRACK_INDEX)
+    restart()
 
 def cycle_to_prev_track():
     global TRACK_INDEX
     TRACK_INDEX = (TRACK_INDEX - 1) % len(trackArr)
     print('cycle to prev track func hit', TRACK_INDEX)
+    restart()
 
 def run_sim(genomes, config):
 
