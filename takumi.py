@@ -3,7 +3,7 @@ import pygame, math
 import sys
 import neat
 
-W, H = 1920, 1080
+W, H = 1920, 1280
 RADAR_COLOR = (57, 255, 20)
 COLLISION_COLOR = (255, 255, 255)
 GEN = 0
@@ -24,6 +24,7 @@ trackArr = [
 pygame.display.set_caption("tAkumI")
 pygame.display.update()
 
+##########################################################################################  
 
 class Car:
     def __init__(self, x, y, w, h):
@@ -119,7 +120,6 @@ class Car:
             radar_values[i] = int(radar[1] / 30)
         return radar_values
 
-
 class FinishLine:
     def __init__(self):
         self.image = pygame.image.load("./assets/finish.png").convert()
@@ -128,7 +128,6 @@ class FinishLine:
 
     def update(self):
         screen.blit(self.image, self.rect)
-
 
 class Track:
     def __init__(self, x, y, w, h):
@@ -199,6 +198,8 @@ class Text:
     def draw(self, screen):
         screen.blit(self.surface, self.rect.topleft)
 
+##########################################################################################  
+
 def check_collision_with_background(surface, rect, bg_color):
     left_edge = rect.left
     right_edge = rect.right
@@ -225,10 +226,14 @@ def check_collision_with_background(surface, rect, bg_color):
     return left_collision or right_collision or top_collision or bottom_collision
 
 def cycle_to_next_track():
-    print('cycle to next track func hit')
+    global TRACK_INDEX
+    TRACK_INDEX = (TRACK_INDEX + 1) % len(trackArr)
+    print('cycle to next track func hit', TRACK_INDEX)
 
 def cycle_to_prev_track():
-    print('cycle to prev track func hit')
+    global TRACK_INDEX
+    TRACK_INDEX = (TRACK_INDEX - 1) % len(trackArr)
+    print('cycle to prev track func hit', TRACK_INDEX)
 
 def run_sim(genomes, config):
 
@@ -324,6 +329,7 @@ def run_sim(genomes, config):
         pygame.display.flip()
         clock.tick(60)
 
+##########################################################################################  
 
 if __name__ == "__main__":
 
