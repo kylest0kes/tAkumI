@@ -227,14 +227,19 @@ def check_collision_with_background(surface, rect, bg_color):
     return left_collision or right_collision or top_collision or bottom_collision
 
 def cycle_to_next_track():
-    global TRACK_INDEX
+    global TRACK_INDEX, GEN 
     TRACK_INDEX = (TRACK_INDEX + 1) % len(trackArr)
+    GEN = 0
     start()
 
 def cycle_to_prev_track():
-    global TRACK_INDEX
+    global TRACK_INDEX, GEN 
     TRACK_INDEX = (TRACK_INDEX - 1) % len(trackArr)
+    GEN = 0
     start()
+    
+def toggle_car_radars():
+    print('toggled')
     
 def start():
     def run_sim(genomes, config):
@@ -254,11 +259,26 @@ def start():
         clock = pygame.time.Clock()
 
         # track generations
-        global GEN
+        global GEN 
         GEN += 1
 
         # keep track of time passed
         time = 0
+        
+        texts = [
+            Text("Cycle Between Tracks", 30, (600, 1010), TEXT_COLOR),
+            Text("Toggle Radar", 30, (880, 1010), TEXT_COLOR),
+            Text("Generation: ", 30, (1065, 1010), TEXT_COLOR),
+            Text(str(GEN), 30, (1190, 1010), TEXT_COLOR),
+            Text("Alive Tally: ", 30, (1220, 1010), TEXT_COLOR)  
+        ]
+        
+    
+        buttons = [
+            Button(570, 1020, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
+            Button(845, 1020, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200)), 
+            Button(1035, 1020, 15, "", toggle_car_radars, (57, 255, 20), (97, 255, 60))
+        ]
 
         while True:
             for e in pygame.event.get():
@@ -302,17 +322,6 @@ def start():
             time += 1
             if time == 2400:
                 break
-            
-            cycle_tracks_text = Text("Cycle Between Tracks", 30, (600, 1010), TEXT_COLOR)
-            gen_text = Text("Generation: ", 30, (1000, 1010), TEXT_COLOR)
-            gen_text_value = Text(str(GEN), 30, (1125, 1010), TEXT_COLOR)
-            alive_text = Text("Alive Tally: ", 30, (1200, 1010), TEXT_COLOR)
-            alive_text_value = Text(str(alive), 30, (1315, 1010), TEXT_COLOR)
-        
-            buttons = [
-                Button(570, 1020, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
-                Button(845, 1020, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200))
-            ]
 
             screen.fill((0, 0, 0))
             track.update()
@@ -325,16 +334,16 @@ def start():
 
             for button in buttons:
                 if button.check_hover(pygame.mouse.get_pos()):
-                    button.color = button.hover_color
+                    button.color = tuple(c - 20 for c in button.hover_color)
                 else:
-                    button.color = (150, 150, 150)
+                    button.color = button.hover_color
                 button.draw(screen)
             
-            cycle_tracks_text.draw(screen)
-            gen_text.draw(screen)
-            gen_text_value.draw(screen)
-            alive_text.draw(screen)
-            alive_text_value.draw(screen)
+            for text in texts:
+                text.draw(screen)
+                
+            alive_value = Text(str(alive), 30, (1335, 1010), TEXT_COLOR) 
+            alive_value.draw(screen)
             
             pygame.display.flip()
             clock.tick(60)
