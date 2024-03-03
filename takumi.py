@@ -1,4 +1,3 @@
-from random import randint
 import pygame, math
 import sys
 import neat
@@ -9,6 +8,7 @@ COLLISION_COLOR = (255, 255, 255)
 TEXT_COLOR = (0, 0, 0)
 GEN = 0
 TRACK_INDEX = 0
+CARS = []
 
 pygame.init()
 screen = pygame.display.set_mode((W, H))
@@ -28,6 +28,8 @@ pygame.display.update()
 ##########################################################################################  
 
 class Car:
+    radars_on_global = False
+    
     def __init__(self, x, y, w, h):
         self.x = x
         self.y = y
@@ -38,6 +40,7 @@ class Car:
         self.distance = 0
         self.time = 0
         self.radars = []
+        self.radars_on = False
         self.rect = pygame.Rect(x, y, w, h)
         self.image = pygame.image.load("./assets/cars/ae86.png").convert()
         self.surface = pygame.Surface((w, h), pygame.SRCALPHA)
@@ -95,14 +98,20 @@ class Car:
         )
         self.radars.append(((x, y), dist))
 
+    @classmethod
+    def toggle_draw_radars(cls):
+        cls.radars_on_global = not cls.radars_on_global
+    
     def draw_radars(self, screen, track):
-        pygame.draw.circle(screen, RADAR_COLOR, self.rect.center, 5)
+        if self.radars_on_global:
+            pygame.draw.circle(screen, RADAR_COLOR, self.rect.center, 5)
         self.radars = []
         for deg in range(0, 181, 45):
             self.check_radar(deg, track)
-            pygame.draw.line(
-                screen, RADAR_COLOR, self.rect.center, self.radars[-1][0], 2
-            )
+            if self.radars_on_global:
+                pygame.draw.line(
+                    screen, RADAR_COLOR, self.rect.center, self.radars[-1][0], 2
+                )
 
     def is_alive(self):
         return self.alive
@@ -120,6 +129,7 @@ class Car:
             # not entirely sure what the 30 in this correlates to. may need to look further
             radar_values[i] = int(radar[1] / 30)
         return radar_values
+
 
 class FinishLine:
     def __init__(self):
@@ -239,20 +249,22 @@ def cycle_to_prev_track():
     start()
     
 def toggle_car_radars():
-    print('toggled')
+    for car in CARS:
+        car.toggle_draw_radars()
     
 def start():
     def run_sim(genomes, config):
 
         nn = []
-        cars = []
+        global CARS
+        CARS  = []
 
         # create a new nn for each genome that are passed in
         for _, g in genomes:
             n = neat.nn.FeedForwardNetwork.create(g, config)
             nn.append(n)
             g.fitness = 0
-            cars.append(Car(875, 870, 19, 36))
+            CARS.append(Car(875, 870, 19, 36))
         
         finish = FinishLine()
         track = Track(0, 0, W, H)
@@ -270,14 +282,14 @@ def start():
             Text("Toggle Radar", 30, (880, 1010), TEXT_COLOR),
             Text("Generation: ", 30, (1065, 1010), TEXT_COLOR),
             Text(str(GEN), 30, (1190, 1010), TEXT_COLOR),
-            Text("Alive Tally: ", 30, (1220, 1010), TEXT_COLOR)  
+            Text("Alive Total: ", 30, (1220, 1010), TEXT_COLOR)  
         ]
         
     
         buttons = [
             Button(570, 1020, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
             Button(845, 1020, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200)), 
-            Button(1035, 1020, 15, "", toggle_car_radars, (57, 255, 20), (97, 255, 60))
+            Button(1035, 1020, 15, "", Car.toggle_draw_radars, (57, 255, 20), (97, 255, 60))
         ]
 
         while True:
@@ -292,7 +304,7 @@ def start():
                             button.cb()
 
             # get each cars actions
-            for i, car in enumerate(cars):
+            for i, car in enumerate(CARS):
                 data = nn[i].activate(car.get_radar_data())
                 action = data.index(max(data))
                 if action == 0:
@@ -306,7 +318,7 @@ def start():
                     car.speed += 1
 
             alive = 0
-            for i, car in enumerate(cars):
+            for i, car in enumerate(CARS):
                 car.move()
                 if check_collision_with_background(track.image, car.rect, COLLISION_COLOR):
                     car.alive = False
@@ -327,7 +339,7 @@ def start():
             track.update()
             finish.update()
 
-            for car in cars:
+            for car in CARS:
                 if car.is_alive():
                     car.draw()
                     car.draw_radars(screen, track)
