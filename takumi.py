@@ -130,7 +130,6 @@ class Car:
             radar_values[i] = int(radar[1] / 30)
         return radar_values
 
-
 class FinishLine:
     def __init__(self):
         self.image = pygame.image.load("./assets/finish.png").convert()
@@ -169,9 +168,10 @@ class Button:
         self.cb = cb 
         self.color = color
         self.hover_color = hover_color
+        self.current_color = color
     
     def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
+        pygame.draw.circle(screen, self.current_color, (self.x, self.y), self.radius)
         font = pygame.font.Font(None, 32)
         text = font.render(self.text, True, (0, 0, 0))
         text_rect = text.get_rect(center=(self.x, self.y))
@@ -248,9 +248,13 @@ def cycle_to_prev_track():
     GEN = 0
     start()
     
-def toggle_car_radars():
+def toggle_car_radars(buttons):
     for car in CARS:
         car.toggle_draw_radars()
+        
+    toggle_btn_index = 2
+    
+    buttons[toggle_btn_index].current_color = (0, 255, 0) if Car.radars_on_global else (255, 0, 0)
     
 def start():
     def run_sim(genomes, config):
@@ -285,11 +289,10 @@ def start():
             Text("Alive Total: ", 30, (1220, 1010), TEXT_COLOR)  
         ]
         
-    
         buttons = [
             Button(570, 1020, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
             Button(845, 1020, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200)), 
-            Button(1035, 1020, 15, "", Car.toggle_draw_radars, (57, 255, 20), (97, 255, 60))
+            Button(1035, 1020, 15, "", Car.toggle_draw_radars, (255, 20, 0), (255, 20, 50))
         ]
 
         while True:
@@ -350,6 +353,8 @@ def start():
                 else:
                     button.color = button.hover_color
                 button.draw(screen)
+                
+            toggle_car_radars(buttons)
             
             for text in texts:
                 text.draw(screen)
