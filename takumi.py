@@ -169,6 +169,7 @@ class Button:
         self.color = color
         self.hover_color = hover_color
         self.current_color = color
+        self.hovered = False
     
     def draw(self, screen):
         pygame.draw.circle(screen, self.current_color, (self.x, self.y), self.radius)
@@ -179,7 +180,8 @@ class Button:
 
     def check_hover(self, mouse_pos):
         distance = math.sqrt((self.x - mouse_pos[0])**2 + (self.y - mouse_pos[1])**2)
-        return distance < self.radius
+        self.hovered = distance < self.radius
+        return self.hovered
     
 class Text:
     def __init__(self, text, font_size, position, color=(0, 0, 0), font=None):
@@ -254,7 +256,10 @@ def toggle_car_radars(buttons):
         
     toggle_btn_index = 2
     
+    # Toggle the color of the third button based on the global state of car radars
     buttons[toggle_btn_index].current_color = (0, 255, 0) if Car.radars_on_global else (255, 0, 0)
+    # Update the hover_color attribute based on the current state of car radars
+    buttons[toggle_btn_index].hover_color = (0, 255, 20) if Car.radars_on_global else (255, 0, 20)
     
 def start():
     def run_sim(genomes, config):
