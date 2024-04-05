@@ -242,13 +242,13 @@ def cycle_to_next_track():
     global TRACK_INDEX, GEN 
     TRACK_INDEX = (TRACK_INDEX + 1) % len(trackArr)
     GEN = 0
-    start()
+    game_screen()
 
 def cycle_to_prev_track():
     global TRACK_INDEX, GEN 
     TRACK_INDEX = (TRACK_INDEX - 1) % len(trackArr)
     GEN = 0
-    start()
+    game_screen()
     
 def toggle_car_radars(buttons):
     for car in CARS:
@@ -263,38 +263,11 @@ def toggle_car_radars(buttons):
     
 def intro_screen():
     screen.fill((255, 255, 255))
-    # start_btn = Button(300, 300, 30, "start", start, (150, 150, 150), (200, 200, 200))
-    # start_btn.draw(screen)
-    
-def main():
-    intro = True
-    game = False
-    
-    start_btn = Button(300, 300, 30, "start", start, (150, 150, 150), (200, 200, 200))
+    img = pygame.image.load('./assets/intro.png')
+    screen.blit(img, (0, 0))
 
-    while True:
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif e.type == pygame.MOUSEBUTTONDOWN:
-                mouse_x, mouse_y = pygame.mouse.get_pos()
-                if start_btn.check_hover((mouse_x, mouse_y)):
-                    start_btn.cb()
-                
-                
-        if intro:
-            intro_screen()
-            start_btn.draw(screen)
-        elif game:
-            start()
-
-        pygame.display.update()
-
-        if __name__ == "__main__":
-            main()
     
-def start():
+def game_screen():
     def run_sim(genomes, config):
 
         nn = []
@@ -423,4 +396,32 @@ def start():
         
         population.run(run_sim, 1000)
         
+def main():
+    intro = True
+    game = False
+    
+    start_btn = Button(300, 300, 30, "start", game_screen, (150, 150, 150), (200, 200, 200))
+
+    while True:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                if start_btn.check_hover((mouse_x, mouse_y)):
+                    start_btn.cb()
+                
+                
+        if intro:
+            intro_screen()
+            start_btn.draw(screen)
+        elif game:
+            game_screen()
+
+        pygame.display.update()
+
+        if __name__ == "__main__":
+            main()
+
 main()
