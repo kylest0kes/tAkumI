@@ -263,21 +263,29 @@ def toggle_car_radars(buttons):
     
 def intro_screen():
     screen.fill((255, 255, 255))
-    start_btn = Button(300, 300, 30, "start", start, (150, 150, 150), (200, 200, 200))
-    start_btn.draw(screen)
+    # start_btn = Button(300, 300, 30, "start", start, (150, 150, 150), (200, 200, 200))
+    # start_btn.draw(screen)
     
 def main():
     intro = True
     game = False
+    
+    start_btn = Button(300, 300, 30, "start", start, (150, 150, 150), (200, 200, 200))
 
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif e.type == pygame.MOUSEBUTTONDOWN:
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                if start_btn.check_hover(mouse_x, mouse_y):
+                    start_btn.cb()
+                
                 
         if intro:
             intro_screen()
+            start_btn.draw(screen)
         elif game:
             start()
 
