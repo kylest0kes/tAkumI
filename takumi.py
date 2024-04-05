@@ -261,6 +261,31 @@ def toggle_car_radars(buttons):
     # Update the hover_color attribute based on the current state of car radars
     buttons[toggle_btn_index].hover_color = (0, 255, 20) if Car.radars_on_global else (255, 0, 20)
     
+def intro_screen():
+    screen.fill((255, 255, 255))
+    start_btn = Button(300, 300, 30, "start", start, (150, 150, 150), (200, 200, 200))
+    start_btn.draw(screen)
+    
+def main():
+    intro = True
+    game = False
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+                
+        if intro:
+            intro_screen()
+        elif game:
+            start()
+
+        pygame.display.update()
+
+        if __name__ == "__main__":
+            main()
+    
 def start():
     def run_sim(genomes, config):
 
@@ -340,7 +365,7 @@ def start():
                 break
             
             time += 1
-            if time == 2400:
+            if time == 3200:
                 break
 
             screen.fill((0, 0, 0))
@@ -390,4 +415,4 @@ def start():
         
         population.run(run_sim, 1000)
         
-start()
+main()
