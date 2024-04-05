@@ -279,7 +279,7 @@ def main():
                 sys.exit()
             elif e.type == pygame.MOUSEBUTTONDOWN:
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                if start_btn.check_hover(mouse_x, mouse_y):
+                if start_btn.check_hover((mouse_x, mouse_y)):
                     start_btn.cb()
                 
                 
