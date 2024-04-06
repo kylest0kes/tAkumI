@@ -182,6 +182,7 @@ class Button:
         distance = math.sqrt((self.x - mouse_pos[0])**2 + (self.y - mouse_pos[1])**2)
         self.hovered = distance < self.radius
         return self.hovered
+
     
 class Text:
     def __init__(self, text, font_size, position, color=(0, 0, 0), font=None):
@@ -263,8 +264,11 @@ def toggle_car_radars(buttons):
     
 def intro_screen():
     screen.fill((255, 255, 255))
-    img = pygame.image.load('./assets/intro.png')
+    img = pygame.image.load('./assets/intro.png').convert()
     screen.blit(img, (0, 0))
+    
+def about_screen():
+    screen.fill((255, 255, 255))
 
     
 def game_screen():
@@ -397,10 +401,11 @@ def game_screen():
         population.run(run_sim, 1000)
         
 def main():
-    intro = True
-    game = False
+    INTRO = True
+    GAME = False
     
-    start_btn = Button(300, 300, 30, "start", game_screen, (150, 150, 150), (200, 200, 200))
+    start_btn = Button(1500, 400, 30, "start", game_screen, (150, 150, 150), (200, 200, 200))
+    
 
     while True:
         for e in pygame.event.get():
@@ -412,16 +417,13 @@ def main():
                 if start_btn.check_hover((mouse_x, mouse_y)):
                     start_btn.cb()
                 
-                
-        if intro:
+        if INTRO:
             intro_screen()
             start_btn.draw(screen)
-        elif game:
+        elif GAME:
             game_screen()
 
+
         pygame.display.update()
-
-        if __name__ == "__main__":
-            main()
-
+        
 main()
