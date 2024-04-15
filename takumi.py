@@ -2,7 +2,7 @@ import pygame, math
 import sys
 import neat
 
-W, H = 1920, 1080
+W, H = 1200, 775
 RADAR_COLOR = (57, 255, 20)
 COLLISION_COLOR = (255, 255, 255)
 TEXT_COLOR = (0, 0, 0)
@@ -46,7 +46,7 @@ class Car:
         self.surface = pygame.Surface((w, h), pygame.SRCALPHA)
         self.surface.blit(self.image, (0, 0))
         self.angle = -90
-        self.speed = 0.9
+        self.speed = 0.8
         self.mask = pygame.mask.from_surface(self.image)
 
     def draw(self):
@@ -57,7 +57,7 @@ class Car:
         screen.blit(rotated, new_rect.topleft)
 
     def move(self):
-        speed = 5.0
+        speed = 3.5
 
         self.x -= speed * math.sin(math.radians(self.angle))
         self.y -= speed * math.cos(math.radians(self.angle))
@@ -134,7 +134,7 @@ class FinishLine:
     def __init__(self):
         self.image = pygame.image.load("./assets/finish.png").convert()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect = self.image.get_rect(topleft=(800, 833))
+        self.rect = self.image.get_rect(topleft=(600, 521))
 
     def update(self):
         screen.blit(self.image, self.rect)
@@ -283,7 +283,7 @@ def game_screen():
             n = neat.nn.FeedForwardNetwork.create(g, config)
             nn.append(n)
             g.fitness = 0
-            CARS.append(Car(875, 870, 19, 36))
+            CARS.append(Car(610, 545, 10, 19))
         
         finish = FinishLine()
         track = Track(0, 0, W, H)
@@ -296,18 +296,10 @@ def game_screen():
         # keep track of time passed
         time = 0
         
-        texts = [
-            Text("Cycle Between Tracks", 30, (600, 1010), TEXT_COLOR),
-            Text("Toggle Radar", 30, (880, 1010), TEXT_COLOR),
-            Text("Generation: ", 30, (1065, 1010), TEXT_COLOR),
-            Text(str(GEN), 30, (1190, 1010), TEXT_COLOR),
-            Text("Alive Total: ", 30, (1220, 1010), TEXT_COLOR)  
-        ]
-        
         buttons = [
-            Button(570, 1020, 20, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
-            Button(845, 1020, 20, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200)), 
-            Button(1035, 1020, 15, "", Car.toggle_draw_radars, (255, 20, 0), (255, 20, 50))
+            Button(270, 745, 15, "<", cycle_to_prev_track, (150, 150, 150), (200, 200, 200)),
+            Button(445, 745, 15, ">", cycle_to_next_track, (150, 150, 150), (200, 200, 200)), 
+            Button(635, 745, 15, "", Car.toggle_draw_radars, (255, 20, 0), (255, 20, 50))
         ]
 
         while True:
@@ -371,6 +363,15 @@ def game_screen():
                 
             toggle_car_radars(buttons)
             
+            texts = [
+                Text("Cycle Between Tracks", 25, (270, 700), (255, 255, 255)),
+                Text("Toggle Radar", 25, (580, 700), (255, 255, 255)),
+                Text("Generation: ", 25, (765, 720), (255, 255, 255)),
+                Text(str(GEN), 25, (890, 720), (255, 255, 255)),
+                Text("Alive Total: ", 25, (920, 720), (255, 255, 255)),  
+                Text(str(alive), 25, (1030, 720), (255, 255, 255))
+            ]
+            
             for text in texts:
                 text.draw(screen)
                 
@@ -404,7 +405,7 @@ def main():
     INTRO = True
     GAME = False
     
-    start_btn = Button(1500, 400, 30, "start", game_screen, (150, 150, 150), (200, 200, 200))
+    start_btn = Button(900, 275, 30, "start", game_screen, (150, 150, 150), (200, 200, 200))
     
 
     while True:
